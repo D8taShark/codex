@@ -114,10 +114,20 @@ export function getApiKey(provider: string = "openai"): string | undefined {
   const providersConfig = config.providers ?? providers;
   const providerInfo = providersConfig[provider.toLowerCase()];
   if (providerInfo) {
+    // Ollama uses a dummy default if unset
     if (providerInfo.name === "Ollama") {
       return process.env[providerInfo.envKey] ?? "dummy";
     }
-    return process.env[providerInfo.envKey];
+    // First check for a provider-specific key
+    const specificKey = process.env[providerInfo.envKey];
+    if (specificKey) {
+      return specificKey;
+    }
+    // Fallback to the generic OPENAI_API_KEY if available
+    if (OPENAI_API_KEY) {
+      return OPENAI_API_KEY;
+    }
+    return undefined;
   }
 
   // Checking `PROVIDER_API_KEY` feels more intuitive with a custom provider.
@@ -424,7 +434,7 @@ export const loadConfig = (
       (options.isFullContext
         ? DEFAULT_FULL_CONTEXT_MODEL
         : DEFAULT_AGENTIC_MODEL),
-    provider: storedConfig.provider,
+    provider: storedConfig.provider ?? "openai",
     instructions: combinedInstructions,
     notify: storedConfig.notify === true,
     approvalMode: storedConfig.approvalMode,

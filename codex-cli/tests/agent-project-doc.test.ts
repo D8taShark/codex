@@ -31,6 +31,7 @@ let lastCreateParams: any = null;
 
 vi.mock("openai", () => {
   class FakeOpenAI {
+    // Mock the responses.create method used by the agent
     public responses = {
       create: async (params: any) => {
         lastCreateParams = params;
