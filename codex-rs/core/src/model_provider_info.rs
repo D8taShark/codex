@@ -111,11 +111,37 @@ impl ModelProviderInfo {
 
         let mut builder = client.post(url);
 
+        use codex_login::AuthMode;
+
         if let Some(auth) = effective_auth.as_ref() {
-            builder = builder.bearer_auth(auth.get_token().await?);
+            let token = auth.get_token().await?;
+
+            // Azure OpenAI deployments expect the API key to be supplied via the
+            // `api-key` header instead of the standard `Authorization: Bearer …`.
+            // Detect such deployments heuristically from the base URL so that
+            // users don't need to add custom header overrides in their config.
+            match auth.mode {
+                AuthMode::ApiKey if self.is_azure_openai() => {
+                    builder = builder.header("api-key", token);
+                }
+                _ => {
+                    // Default behaviour matches OpenAI-compatible services which
+                    // accept the key/token as a Bearer auth header.
+                    builder = builder.bearer_auth(token);
+                }
+            }
         }
 
         Ok(self.apply_http_headers(builder))
+    }
+
+    /// Heuristic check whether this provider points at an Azure OpenAI
+    /// deployment, which uses the `api-key` header for authentication.
+    fn is_azure_openai(&self) -> bool {
+        self.base_url
+            .as_ref()
+            .map(|u| u.contains(".openai.azure.com"))
+            .unwrap_or(false)
     }
 
     fn get_query_string(&self) -> String {
