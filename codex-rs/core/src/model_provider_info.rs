@@ -79,6 +79,10 @@ pub struct ModelProviderInfo {
     /// Whether this provider requires some form of standard authentication (API key, ChatGPT token).
     #[serde(default)]
     pub requires_openai_auth: bool,
+
+    /// Whether to omit the `model` field from request payloads.
+    #[serde(default)]
+    pub omit_model_field: bool,
 }
 
 impl ModelProviderInfo {
@@ -273,6 +277,7 @@ pub fn built_in_model_providers() -> HashMap<String, ModelProviderInfo> {
                 stream_max_retries: None,
                 stream_idle_timeout_ms: None,
                 requires_openai_auth: true,
+                omit_model_field: false,
             },
         ),
         (BUILT_IN_OSS_MODEL_PROVIDER_ID, create_oss_provider()),
@@ -317,6 +322,7 @@ pub fn create_oss_provider_with_base_url(base_url: &str) -> ModelProviderInfo {
         stream_max_retries: None,
         stream_idle_timeout_ms: None,
         requires_openai_auth: false,
+        omit_model_field: false,
     }
 }
 
@@ -345,6 +351,7 @@ base_url = "http://localhost:11434/v1"
             stream_max_retries: None,
             stream_idle_timeout_ms: None,
             requires_openai_auth: false,
+            omit_model_field: false,
         };
 
         let provider: ModelProviderInfo = toml::from_str(azure_provider_toml).unwrap();
@@ -374,6 +381,7 @@ query_params = { api-version = "2025-04-01-preview" }
             stream_max_retries: None,
             stream_idle_timeout_ms: None,
             requires_openai_auth: false,
+            omit_model_field: false,
         };
 
         let provider: ModelProviderInfo = toml::from_str(azure_provider_toml).unwrap();
@@ -406,6 +414,7 @@ env_http_headers = { "X-Example-Env-Header" = "EXAMPLE_ENV_VAR" }
             stream_max_retries: None,
             stream_idle_timeout_ms: None,
             requires_openai_auth: false,
+            omit_model_field: false,
         };
 
         let provider: ModelProviderInfo = toml::from_str(azure_provider_toml).unwrap();

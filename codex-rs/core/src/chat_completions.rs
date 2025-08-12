@@ -110,12 +110,26 @@ pub(crate) async fn stream_chat_completions(
     }
 
     let tools_json = create_tools_json_for_chat_completions_api(&prompt.tools)?;
-    let payload = json!({
-        "model": model_family.slug,
-        "messages": messages,
-        "stream": true,
-        "tools": tools_json,
-    });
+    let omit_model = provider.omit_model_field
+        || provider
+            .base_url
+            .as_ref()
+            .map_or(false, |url| url.contains("/deployments/"));
+
+    let payload = if omit_model {
+        json!({
+            "messages": messages,
+            "stream": true,
+            "tools": tools_json,
+        })
+    } else {
+        json!({
+            "model": model_family.slug,
+            "messages": messages,
+            "stream": true,
+            "tools": tools_json,
+        })
+    };
 
     debug!(
         "POST to {}: {}",

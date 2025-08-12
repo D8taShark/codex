@@ -450,6 +450,7 @@ async fn azure_overrides_assign_properties_used_for_responses_url() {
         stream_max_retries: None,
         stream_idle_timeout_ms: None,
         requires_openai_auth: false,
+        omit_model_field: false,
     };
 
     // Init session
@@ -524,6 +525,7 @@ async fn env_var_overrides_loaded_auth() {
         stream_max_retries: None,
         stream_idle_timeout_ms: None,
         requires_openai_auth: false,
+        omit_model_field: false,
     };
 
     // Init session
